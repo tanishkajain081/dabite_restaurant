@@ -1,3 +1,4 @@
+import { supabase } from "../lib/supabaseClient";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -51,6 +52,7 @@ const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
   const password = (document.getElementById("login-password") as HTMLInputElement).value;
 
   try {
+    // Step 1: Call your backend
     const res = await fetch("http://localhost:5050/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -61,8 +63,20 @@ const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     setIsLoading(false);
 
     if (res.ok) {
+      // Step 2: Sign in to Supabase Auth
+      const { data: sessionData, error: sessionError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (sessionError) {
+        alert("Login failed: " + sessionError.message);
+        return;
+      }
+
+      // Step 3: Store token and redirect
       localStorage.setItem("token", data.token);
-      alert("Login successful!");
+      alert("✅ Login successful!");
       window.location.href = "/dashboard";
     } else {
       alert(data.error || "Invalid credentials.");
