@@ -9,25 +9,70 @@ import authHero from "@/assets/auth-hero.jpg";
 const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setIsLoading(true);
-    // TODO: Implement actual authentication
-    setTimeout(() => {
-      setIsLoading(false);
-      window.location.href = "/dashboard";
-    }, 1000);
-  };
-
   const handleSignup = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setIsLoading(true);
-    // TODO: Implement actual authentication
-    setTimeout(() => {
-      setIsLoading(false);
+  e.preventDefault();
+  setIsLoading(true);
+
+  const email = (document.getElementById("signup-email") as HTMLInputElement).value;
+  const password = (document.getElementById("signup-password") as HTMLInputElement).value;
+
+  try {
+    const res = await fetch("http://localhost:5050/signup", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
+
+    const data = await res.json();
+    setIsLoading(false);
+
+    if (res.ok) {
+  // Show success message first
+  alert("✅ Account created! Please verify your email before logging in.");
+
+  // After user clicks OK, switch to Login tab
+  const loginButton = document.querySelector("button[value='login']") as HTMLButtonElement | null;
+  if (loginButton) loginButton.click();
+} else {
+  alert(data.error || "Signup failed.");
+}
+  } catch (err) {
+    console.error(err);
+    setIsLoading(false);
+    alert("Something went wrong. Please try again.");
+  }
+};
+
+const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
+  e.preventDefault();
+  setIsLoading(true);
+
+  const email = (document.getElementById("login-email") as HTMLInputElement).value;
+  const password = (document.getElementById("login-password") as HTMLInputElement).value;
+
+  try {
+    const res = await fetch("http://localhost:5050/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
+
+    const data = await res.json();
+    setIsLoading(false);
+
+    if (res.ok) {
+      localStorage.setItem("token", data.token);
+      alert("Login successful!");
       window.location.href = "/dashboard";
-    }, 1000);
-  };
+    } else {
+      alert(data.error || "Invalid credentials.");
+    }
+  } catch (err) {
+    console.error(err);
+    setIsLoading(false);
+    alert("Something went wrong. Please try again.");
+  }
+};
 
   return (
     <div className="min-h-screen grid lg:grid-cols-2">
