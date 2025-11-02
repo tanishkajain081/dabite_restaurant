@@ -7,92 +7,93 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import authHero from "@/assets/auth-hero.jpg";
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSignup = async (e: React.FormEvent<HTMLFormElement>) => {
-  e.preventDefault();
-  setIsLoading(true);
+    e.preventDefault();
+    setIsLoading(true);
 
-  const email = (document.getElementById("signup-email") as HTMLInputElement).value;
-  const password = (document.getElementById("signup-password") as HTMLInputElement).value;
+    const email = (document.getElementById("signup-email") as HTMLInputElement).value;
+    const password = (document.getElementById("signup-password") as HTMLInputElement).value;
 
-  try {
-    const res = await fetch("http://localhost:5050/signup", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    });
-
-    const data = await res.json();
-    setIsLoading(false);
-
-    if (res.ok) {
-  // Show success message first
-  alert("✅ Account created! Please verify your email before logging in.");
-
-  // After user clicks OK, switch to Login tab
-  const loginButton = document.querySelector("button[value='login']") as HTMLButtonElement | null;
-  if (loginButton) loginButton.click();
-} else {
-  alert(data.error || "Signup failed.");
-}
-  } catch (err) {
-    console.error(err);
-    setIsLoading(false);
-    alert("Something went wrong. Please try again.");
-  }
-};
-
-const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
-  e.preventDefault();
-  setIsLoading(true);
-
-  const email = (document.getElementById("login-email") as HTMLInputElement).value;
-  const password = (document.getElementById("login-password") as HTMLInputElement).value;
-
-  try {
-    // Step 1: Call your backend
-    const res = await fetch("http://localhost:5050/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    });
-
-    const data = await res.json();
-    setIsLoading(false);
-
-    if (res.ok) {
-      // Step 2: Sign in to Supabase Auth
-      const { data: sessionData, error: sessionError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+    try {
+      const res = await fetch(`${API_BASE_URL}/signup`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
       });
 
-      if (sessionError) {
-        alert("Login failed: " + sessionError.message);
-        return;
-      }
+      const data = await res.json();
+      setIsLoading(false);
 
-      // Step 3: Store token and redirect
-      localStorage.setItem("token", data.token);
-      alert("✅ Login successful!");
-      window.location.href = "/dashboard";
-    } else {
-      alert(data.error || "Invalid credentials.");
+      if (res.ok) {
+        // Show success message first
+        alert("✅ Account created! Please verify your email before logging in.");
+
+        // After user clicks OK, switch to Login tab
+        const loginButton = document.querySelector("button[value='login']") as HTMLButtonElement | null;
+        if (loginButton) loginButton.click();
+      } else {
+        alert(data.error || "Signup failed.");
+      }
+    } catch (err) {
+      console.error(err);
+      setIsLoading(false);
+      alert("Something went wrong. Please try again.");
     }
-  } catch (err) {
-    console.error(err);
-    setIsLoading(false);
-    alert("Something went wrong. Please try again.");
-  }
-};
+  };
+
+  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    const email = (document.getElementById("login-email") as HTMLInputElement).value;
+    const password = (document.getElementById("login-password") as HTMLInputElement).value;
+
+    try {
+      // Step 1: Call your backend
+      const res = await fetch(`${API_BASE_URL}/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await res.json();
+      setIsLoading(false);
+
+      if (res.ok) {
+        // Step 2: Sign in to Supabase Auth
+        const { data: sessionData, error: sessionError } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+
+        if (sessionError) {
+          alert("Login failed: " + sessionError.message);
+          return;
+        }
+
+        // Step 3: Store token and redirect
+        localStorage.setItem("token", data.token);
+        alert("✅ Login successful!");
+        window.location.href = "/dashboard";
+      } else {
+        alert(data.error || "Invalid credentials.");
+      }
+    } catch (err) {
+      console.error(err);
+      setIsLoading(false);
+      alert("Something went wrong. Please try again.");
+    }
+  };
 
   return (
     <div className="min-h-screen grid lg:grid-cols-2">
       {/* Hero Section */}
       <div className="hidden lg:flex flex-col justify-center items-center bg-primary p-12 relative overflow-hidden">
-        <div 
+        <div
           className="absolute inset-0 opacity-20"
           style={{
             backgroundImage: `url(${authHero})`,
@@ -134,25 +135,25 @@ const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
                   <form onSubmit={handleLogin} className="space-y-4">
                     <div className="space-y-2">
                       <Label htmlFor="login-email">Email</Label>
-                      <Input 
-                        id="login-email" 
-                        type="email" 
-                        placeholder="chef@example.com" 
-                        required 
+                      <Input
+                        id="login-email"
+                        type="email"
+                        placeholder="chef@example.com"
+                        required
                       />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="login-password">Password</Label>
-                      <Input 
-                        id="login-password" 
-                        type="password" 
-                        placeholder="••••••••" 
-                        required 
+                      <Input
+                        id="login-password"
+                        type="password"
+                        placeholder="••••••••"
+                        required
                       />
                     </div>
-                    <Button 
-                      type="submit" 
-                      className="w-full" 
+                    <Button
+                      type="submit"
+                      className="w-full"
                       size="lg"
                       disabled={isLoading}
                     >
@@ -173,44 +174,44 @@ const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
                   <form onSubmit={handleSignup} className="space-y-4">
                     <div className="space-y-2">
                       <Label htmlFor="signup-name">Full Name / Business Name</Label>
-                      <Input 
-                        id="signup-name" 
-                        type="text" 
-                        placeholder="Your Kitchen Name" 
-                        required 
+                      <Input
+                        id="signup-name"
+                        type="text"
+                        placeholder="Your Kitchen Name"
+                        required
                       />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="signup-email">Email</Label>
-                      <Input 
-                        id="signup-email" 
-                        type="email" 
-                        placeholder="chef@example.com" 
-                        required 
+                      <Input
+                        id="signup-email"
+                        type="email"
+                        placeholder="chef@example.com"
+                        required
                       />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="signup-phone">Phone Number</Label>
-                      <Input 
-                        id="signup-phone" 
-                        type="tel" 
-                        placeholder="+91 98765 43210" 
-                        required 
+                      <Input
+                        id="signup-phone"
+                        type="tel"
+                        placeholder="+91 98765 43210"
+                        required
                       />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="signup-password">Password</Label>
-                      <Input 
-                        id="signup-password" 
-                        type="password" 
-                        placeholder="••••••••" 
-                        required 
+                      <Input
+                        id="signup-password"
+                        type="password"
+                        placeholder="••••••••"
+                        required
                       />
                     </div>
-                    <Button 
-                      type="submit" 
+                    <Button
+                      type="submit"
                       variant="accent"
-                      className="w-full" 
+                      className="w-full"
                       size="lg"
                       disabled={isLoading}
                     >
